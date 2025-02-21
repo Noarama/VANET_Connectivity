@@ -3,6 +3,6 @@ This repository contains simulations to assess the validity of the probabilities
 
 
 
-References 
+### References
 [1] Y. Zhuang, J. Pan, and L. Cai, “A probabilistic model for message propagation in two-dimensional vehicular ad-hoc networks,” in Proceedings of the seventh ACM international workshop on VehiculAr InterNETworking, New York, NY, USA: ACM, 2010, pp. 31–40. doi: 10.1145/1860058.1860064.
 
