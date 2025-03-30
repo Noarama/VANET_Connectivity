@@ -1,14 +1,14 @@
 class Cluster:
-    connected_vehicles = []
-    last_vehicle = -1
-    first_vehicle = -1
-    cluster_size = -1
+    # connected_vehicles = []
+    # last_vehicle = -1
+    # first_vehicle = -1
+    # cluster_size = -1
 
     def __init__(self):
         self.connected_vehicles = []
-        self.last_vehicle = -1
-        self.first_vehicle = -1
-        self.cluster_size = -1
+        self.last_vehicle = None
+        self.first_vehicle = None
+        self.cluster_size = 0
 
     def add_to_cluster(self, new_vehicle):
         if(not self.connected_vehicles):
