@@ -25,7 +25,7 @@ def generate_vehicle_positions(r):
         positions.append(current_position)
 
         # Stop condition: proportional to the transmission range to speed up algorithm. 
-        if len(positions) > 1000 * r: 
+        if len(positions) > 100 * r: 
             break
 
     return np.array(positions)
