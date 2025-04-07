@@ -7,14 +7,13 @@ import time
 
 start_time = time.perf_counter()
 
-np.random.seed(14)
+np.random.seed(123)
 
 INTERSECTION_DISTANCE = 50 # Meters
-VEHICLE_DENSITY = 0.18# Vehicles per meter
+VEHICLE_DENSITY = 0.12# Vehicles per meter
 TRANSMISSION_RANGE = 20 # Meters
-REP = 150# Times
-DISTANCES = [50,100, 500, 900]
-# DISTANCES = [50, 100, 150, 250, 300, 450,600,900,1000,1500,2000,2500] # Meterss
+REP = 100 # Times
+DISTANCES = [50,100,300, 500, 900, 1500]
 
 # Theory Helpers Start
 
@@ -67,21 +66,20 @@ def recursive_P(p, x):
 
 # Simulation Helpers Start
 
-def generate_vehicles():
-    # We limit the simulation to a 2d-square lattice of size 2x15
-    # This will mean that for each road out of the 30, we generate vehicles according to the exponential distribution
+def generate_vehicles(distance):
+    # We create a lattice by creating roads. Along each road, we generate vehicles 
     roads =[]
     x = 0
     y = 0
 
     # Generate 15 vertical roads
-    for _ in range(int(max(DISTANCES)/INTERSECTION_DISTANCE)):
-        roads.append( Road( x , -1 , VEHICLE_DENSITY, TRANSMISSION_RANGE) )
+    for _ in range(int((distance+INTERSECTION_DISTANCE)/INTERSECTION_DISTANCE)):
+        roads.append( Road( x , -1 , VEHICLE_DENSITY, TRANSMISSION_RANGE, distance, INTERSECTION_DISTANCE) )
         x += INTERSECTION_DISTANCE
 
     # Generate 2 horizontal roads
     for _ in range(2):
-        roads.append( Road( -1 , y , VEHICLE_DENSITY, TRANSMISSION_RANGE) )
+        roads.append( Road( -1 , y , VEHICLE_DENSITY, TRANSMISSION_RANGE, distance, INTERSECTION_DISTANCE) )
         y += INTERSECTION_DISTANCE
 
     return roads
@@ -93,10 +91,7 @@ def create_euclidean_graph(roads):
 
     for road in roads:
         for vehicle in road.vehicles:
-            if vehicle[1] <= INTERSECTION_DISTANCE:
-                vertices.append(vehicle)
-
-    # print(vertices)
+            vertices.append(vehicle)
 
     # Create the adgacency matrix: 
     edges = [[0 for _ in range(len(vertices))] for _ in range(len(vertices))]
@@ -109,13 +104,17 @@ def create_euclidean_graph(roads):
         for j in range(len(vertices)):
             if i == j:
                 continue
+
             dx = vertices[j][0] - vertices[i][0]
             dy = vertices[j][1] - vertices[i][1]
             distance = math.sqrt(dx**2 + dy**2)
 
             # Only connect if within range *and* moving toward increasing x
-            if distance <= TRANSMISSION_RANGE and dx >=0:
+            if distance <= TRANSMISSION_RANGE and dx >= 0 and dy >= 0:
                 edges[i][j] = 1  # Directed edge from i to j
+
+            # else if distance <= TRANSMISSION_RANGE and dx < 0:
+            #     edges[j][i] = 1
 
     # print(edges)
 
@@ -132,7 +131,7 @@ def dfs(vertices, edges, start, distance, visited = None):
     # Explore neighbors
     for neighbor, is_connected in enumerate(edges[start]):
         if is_connected and neighbor not in visited:
-            if vertices[neighbor][0] >= distance and vertices[neighbor][1] == INTERSECTION_DISTANCE:
+            if vertices[neighbor][0] >= distance and vertices[neighbor][1] >= INTERSECTION_DISTANCE:
                 return 1
             result = dfs(vertices, edges, neighbor, distance, visited)
             if result == 1:
@@ -156,7 +155,7 @@ def main():
         successes = 0
 
         for _ in range(REP):
-            roads = generate_vehicles()
+            roads = generate_vehicles(distance)
 
 
             vertices, edges = create_euclidean_graph(roads)
@@ -174,13 +173,13 @@ def main():
 
 
     plt.figure(figsize=(8, 5))
-    plt.plot(DISTANCES, theoretical_probs, '--')
-    plt.plot(DISTANCES, sim_probabilities, marker='o')
+    plt.plot(DISTANCES, theoretical_probs, marker = 'o', label = "Recursion")
+    plt.plot(DISTANCES, sim_probabilities, '--', label = "Simulation")
     plt.xlabel("Distance (m)")
     plt.ylabel("Message Delivery Probability")
     plt.title("Figure 7: Message Delivery Probability vs. Distance")
-    plt.grid(True)
-    # plt.xscale("log")
+    plt.legend()
+
     plt.show()
 
 
