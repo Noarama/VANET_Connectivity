@@ -78,11 +78,13 @@ def compute_gamma_ccdf(sorted_data , density):
 
     mean = (1 - np.exp(-density * TRANSMISSION_RANGE) * (density * TRANSMISSION_RANGE + 1)) / (density * np.exp(-density * TRANSMISSION_RANGE))
     second_moment = (2 * mean * X1 + X2) / np.exp(-density*TRANSMISSION_RANGE)
+    # second_moment = 
 
     k = 1 / ((second_moment / mean**2) - 1) 
     theta = mean / k
+    print(k)
 
-    return gamma.sf(sorted_data , 1 , scale = theta)
+    return gamma.sf(sorted_data , k , scale = theta)
 
 def main():
     
@@ -94,7 +96,6 @@ def main():
         data = np.sort(cluster_sizes)
         ccdf = compute_empirical_ccdf(data)
         plt.plot(data, ccdf, '--', markersize=4, label=f"Empirical CCDF (λ={density})")
-        # x = np.linspace(min(data), max(data), 10000)
         x = np.linspace(0,max(data),1000)
         gamma_ccdf = compute_gamma_ccdf(x , density)
         plt.plot(x, gamma_ccdf, '-', label=f"Gamma Approx (λ={density})")
